@@ -6,6 +6,8 @@ Do not put database ids in this file. We assign those when we apply the catalog 
 
 Keep `"$schema": "./schemas/catalog.schema.json"` at the top.
 
+**IDR live data is root `catalog.json`.** Product `IDR`. Surface `idr`. Host `idrAgent`. `examples/` is not the shop. Scomm is a **different tenant** and a different repo.
+
 ## Example shape
 
 ```json
@@ -61,9 +63,9 @@ You choose the words (`web`, `desktop`, host names, product names). Empty `"prod
 | `surfaces` | Labels for “which kind of app” (email vs office, web vs desktop, …). List them here before you use them on a SKU. |
 | `platforms` | Extra OS labels (today: `linux` if you have a Linux-only SKU). |
 | `hosts` | Your apps. Each host lists which `surfaces` it sells. Optional `excludePlatforms` hides Linux-only SKUs from a desktop host. |
-| `products` | What customers buy under. Empty `{}` is the blank template, not a live shop. |
-| `offerings` | Add-ons / entitlements (codes your apps check). |
-| `plans` | Priced bundles. `offeringCodes` must be offering keys **on that product**. |
+| `products` | What customers buy under. IDR’s live product is root `"IDR"`. Empty `{}` is not this fork. |
+| `offerings` | **What the app unlocks** (codes your apps check). No price. One offering can sit on several plans. |
+| `plans` | **What the shop sells** (priced SKUs). `offeringCodes` must be offering keys **on that product**. |
 | `pricings` | `annual` / `monthly` / … → `{ "currency": "USD", "basePrice": 10 }`. One currency per interval in this version. |
 
 Optional `billingEngineTag` is a note for us (which catalog format this file was written against). `schemaVersion` is `1` for this format.

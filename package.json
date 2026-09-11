@@ -1,8 +1,8 @@
 {
-	"name": "billing-seed-template",
+	"name": "2key-idr-seed-templates",
 	"private": true,
 	"type": "module",
-	"description": "Your shop catalog (JSON). Run npm run validate before a PR. We apply it to billing — you do not need the billing engine.",
+	"description": "IDR shop catalog (JSON). Run npm run validate before a PR. We apply it to IDR billing — you do not need the billing engine.",
 	"scripts": {
 		"validate": "node scripts/validate-catalog.mjs"
 	},

@@ -1,4 +1,21 @@
 {
-	"productNames": [],
-	"hosts": {}
+	"productNames": [
+		"IDR"
+	],
+	"hosts": {
+		"idrAgent": {
+			"offeringCodes": [
+				"idr_personal_bundle",
+				"idr_enterprise_bundle",
+				"idr_sp_target",
+				"data_transfer_1tb"
+			],
+			"addonCodes": [
+				"idr_personal_bundle",
+				"idr_enterprise_bundle",
+				"idr_sp_target",
+				"idr_data_transfer_1tb"
+			]
+		}
+	}
 }

@@ -2,36 +2,38 @@
 
 **Audience: us.** They never get the billing engine.
 
-They **fork**, **fill**, and **raise their own PRs**. We sit with them on the JSON. We do **not** own their catalog, merge their PRs, or treat an empty shop as our failure to “hand them a filled fork.”
+IDR **owns this fork**. They fill and raise PRs. We sit with them on the JSON. We do **not** own their catalog or their PRs.
 
-**Our ops job is one thing:** when we get `catalog-seed-updated` for **that** `catalog_repo`, apply that SHA on **that tenant’s billing VM**.
+**Our ops job:** when we get `catalog-seed-updated` for this `catalog_repo`, apply that SHA on the **IDR billing VM**. Do not apply this fork onto the Scomm VM (or any other tenant).
 
 ```
-they fork 2keyapp/2key-seed-templates
 they fill + PR (we help)
 merge to main → dispatch { sha, ref, catalog_repo }
-we apply that commit on the VM wired to that fork
+we apply that commit on the IDR VM
 ```
 
-Canonical blank: [`2keyapp/2key-seed-templates`](https://github.com/2keyapp/2key-seed-templates). Empty `products` is the starting point of **their** fork.
+Canonical blank: [`2keyapp/2key-seed-templates`](https://github.com/2keyapp/2key-seed-templates).
 
-## Once per tenant VM (wire the trigger)
+Scomm: sibling `2key-scomm-seed-templates` → Scomm VM / Scomm DB only.
 
-1. They fork the template into their GitHub org.
-2. On **their** fork we set `DOWNSTREAM_DISPATCH_TOKEN` and `DOWNSTREAM_REPO` so push to `main` dispatches **our** ops. Canonical `2keyapp/2key-seed-templates` must **not** dispatch.
-3. Ops maps `catalog_repo` → **that VM** (not a table in the billing engine). Staging and production are different VMs; each gets its own mapping (and usually its own fork or branch policy — their git, our apply target).
-4. Enable currencies they will price (usually `USD`). Configure IdP on that billing. They still fill `auth.json` if they want first-login emails.
+## This tenant (IDR)
 
-## Sitting with them (support, not our PR)
+- GitHub: `dev2t/2key-idr-seed-templates`
+- Live files: root `catalog.json` / `auth.json` (not `examples/`)
+- Trigger → apply on the IDR VM only (`BILLING_SEED_DIR` / `--dir` pointing at this checkout @ payload `sha`)
+- Database, Stripe, IdP, and portal origin are **this** deployment’s, not Scomm’s
 
-- [examples/sample-shop/](../examples/sample-shop/) is shape only. **They** rename every key. Leftover `SecMail` / `secmailDesktop` must not land on their `main`.
+## Sitting with them
+
+Support on **their** branch. If CI is red, they fix (we help). We do not take over the PR.
+
+- [examples/sample-shop/](../examples/sample-shop/) is shape only. Do not copy it over IDR’s live root.
 - `npm ci && npm run validate`; they commit `hosts.json` on their PR.
 - Recipes: [recipes.md](recipes.md). Field list: [catalog.md](catalog.md).
-- We do not take over the PR. If CI is red, we help them fix **their** branch.
 
 ## On trigger (apply)
 
-Checkout `catalog_repo` at `sha`. Against **that VM’s** DB:
+Checkout this repo at `sha`. Against the **IDR** VM’s DB:
 
 ```bash
 billing-seed validate --dir .
@@ -42,7 +44,8 @@ See [ci-and-ops.md](ci-and-ops.md). If apply fails (unknown currency, omitted li
 
 ## Do not
 
-- Fill and merge the catalog as if it were ours
-- Apply a fork onto the wrong VM
+- Apply IDR’s catalog onto the Scomm VM
+- Apply Scomm’s catalog onto the IDR VM
+- Mix both catalogs into one Postgres database
+- Fill and merge as if this repo were ours
 - Give them the billing engine, Stripe keys, or SQL
-- Dispatch from the canonical empty template
