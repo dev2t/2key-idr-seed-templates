@@ -50,7 +50,7 @@ billing-seed apply --dir .
 | Symptom | Likely cause |
 |---------|----------------|
 | `npm run validate` extra property | Typo or a field not in format v1. Help them on **their** PR. |
-| Apply unknown offering | `offeringCodes` is not a key on `IDR` offerings. Help them on **their** PR. |
+| Apply unknown offering | a plan's `offerings` names a key that is not one of the `idr` product's offerings. Help them on **their** PR. |
 | Apply unknown currency | USD not enabled on **this** VM. |
 | Apply refuses to drop a SKU | They deleted a live key. `"isActive": false`. |
 | Dispatch skipped | Canonical template, or the event is a pull_request. |

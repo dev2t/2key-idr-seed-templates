@@ -1,74 +1,51 @@
 /**
  * Derive hosts.json from catalog.json host rules.
- * Same rules as billing `deriveHostCatalog`. Apps consume this file; billing-seed apply does not write it.
+ * Same rules as billing `deriveHostCatalog` (src/utils/catalog-seed/host-catalog.util.ts):
+ * an offering is sold on a host when its settings.surfaces hit the host's surfaces and its
+ * settings.platforms are not all excluded by the host. Apps consume this file;
+ * billing-seed apply does not write it.
  *
  * @param {Record<string, unknown>} catalog
- * @returns {{ productNames: string[], hosts: Record<string, { offeringCodes: string[], addonCodes: string[] }> }}
+ * @returns {{ productCodes: string[], hosts: Record<string, { offeringCodes: string[], licensedPlatforms?: string[] }> }}
  */
 export function deriveHostCatalog(catalog) {
-	const products =
-		catalog.products != null && typeof catalog.products === "object"
-			? catalog.products
-			: {};
-	const rules =
-		catalog.hosts != null && typeof catalog.hosts === "object"
-			? catalog.hosts
-			: {};
+	const products = isObject(catalog.products) ? catalog.products : {};
+	const rules = isObject(catalog.hosts) ? catalog.hosts : {};
+	/** @type {Record<string, { offeringCodes: string[], licensedPlatforms?: string[] }>} */
 	const hosts = {};
 
-	for (const key of Object.keys(rules)) {
-		hosts[key] = { offeringCodes: [], addonCodes: [] };
+	for (const [key, rule] of Object.entries(rules)) {
+		hosts[key] = {
+			offeringCodes: [],
+			...(isObject(rule) && Array.isArray(rule.licensedPlatforms)
+				? { licensedPlatforms: [...rule.licensedPlatforms] }
+				: {}),
+		};
 	}
-
-	const productNames = Object.keys(products);
 
 	for (const product of Object.values(products)) {
 		const offerings =
-			product != null &&
-			typeof product === "object" &&
-			product.offerings != null &&
-			typeof product.offerings === "object"
-				? product.offerings
-				: {};
-
+			isObject(product) && isObject(product.offerings) ? product.offerings : {};
 		for (const [offeringCode, offering] of Object.entries(offerings)) {
-			if (offering == null || typeof offering !== "object") {
-				continue;
-			}
-			const addon = addonCodeFor(offeringCode, offering);
-
+			if (!isObject(offering)) continue;
 			for (const [hostKey, rule] of Object.entries(rules)) {
-				if (!offeringMatchesHost(offering, rule)) {
-					continue;
-				}
 				const bucket = hosts[hostKey];
-				if (bucket == null) {
-					continue;
+				if (bucket && offeringMatchesHost(offering, rule)) {
+					pushUnique(bucket.offeringCodes, offeringCode);
 				}
-				pushUnique(bucket.offeringCodes, offeringCode);
-				pushUnique(bucket.addonCodes, addon);
 			}
 		}
 	}
 
-	return { productNames, hosts };
+	return { productCodes: Object.keys(products), hosts };
 }
 
 /**
- * @param {string} offeringCode
- * @param {Record<string, unknown>} offering
- * @returns {string}
+ * @param {unknown} value
+ * @returns {value is Record<string, any>}
  */
-function addonCodeFor(offeringCode, offering) {
-	const resources =
-		offering.resources != null && typeof offering.resources === "object"
-			? offering.resources
-			: {};
-	const raw = resources.addonCode;
-	if (typeof raw === "string" && raw.trim() !== "") {
-		return raw.trim();
-	}
-	return offeringCode;
+function isObject(value) {
+	return value != null && typeof value === "object" && !Array.isArray(value);
 }
 
 /**
@@ -99,20 +76,17 @@ function onlyExcludedPlatforms(offeringPlatforms, excludePlatforms) {
 }
 
 /**
- * @param {Record<string, unknown>} offering
+ * @param {Record<string, any>} offering
  * @param {unknown} rule
  * @returns {boolean}
  */
 function offeringMatchesHost(offering, rule) {
-	if (rule == null || typeof rule !== "object") {
+	if (!isObject(rule)) {
 		return false;
 	}
-	const resources =
-		offering.resources != null && typeof offering.resources === "object"
-			? offering.resources
-			: {};
-	const offeringSurfaces = Array.isArray(resources.surfaces)
-		? resources.surfaces
+	const settings = isObject(offering.settings) ? offering.settings : {};
+	const offeringSurfaces = Array.isArray(settings.surfaces)
+		? settings.surfaces
 		: [];
 	const hostSurfaces = Array.isArray(rule.surfaces) ? rule.surfaces : [];
 	const hitsSurface = hostSurfaces.some((surface) =>
@@ -121,5 +95,5 @@ function offeringMatchesHost(offering, rule) {
 	if (!hitsSurface) {
 		return false;
 	}
-	return !onlyExcludedPlatforms(resources.platforms, rule.excludePlatforms);
+	return !onlyExcludedPlatforms(settings.platforms, rule.excludePlatforms);
 }

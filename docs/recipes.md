@@ -8,10 +8,10 @@ Shop card **titles** are the plan keys below. Search the file for the quoted nam
 
 | Shop title | Offering key (do not rename) | Price | Devices |
 |------------|------------------------------|-------|---------|
-| Personal Package | `idr_personal_bundle` | US$5 / year | 5 |
-| Enterprise Package | `idr_enterprise_bundle` | US$25 / year | 5 |
-| Service Provider Package | `idr_sp_target` | US$20 / year | 1 |
-| Usage-based billing | `data_transfer_1tb` | US$10 / 1 TB / year | — |
+| Personal Package | `idr_personal_bundle` | US$10 / year | 5 |
+| Enterprise Package | `idr_enterprise_bundle` | US$10 / month | 5 |
+| Service Provider Package | `idr_sp_target` | US$25 / year | 1 |
+| Usage-based billing | `idr_data_transfer_1tb` | US$10 / 1 TB / year | — |
 
 Product key: `"IDR"`. App: `idrAgent`. Surface: `idr`. No trial — that is Scomm-only. Prepaid transfer uses meter `idr.transfer.bytes` (1 TiB, 365-day validity).
 
@@ -46,8 +46,8 @@ On the plan (or offering) set `"isActive": false`. Do **not** delete the key. If
 
 You add the keys. Your billing contact will sit with you.
 
-1. Put the offering under `products.IDR.offerings` (give it `resources.surfaces` that match a host).
-2. Put a plan under `plans` with `offeringCodes` pointing at that offering key.
+1. Put the offering under `products.idr.offerings` (give it `settings.surfaces` that match a host).
+2. Put a plan under `plans`, keyed by its plan code, with `"offerings": { "<offering key>": 1 }`.
 3. `npm ci && npm run validate` — commit `hosts.json` if it changed.
 4. Open a PR.
 
