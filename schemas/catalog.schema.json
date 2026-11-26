@@ -42,7 +42,8 @@
 			"type": "object",
 			"propertyNames": {
 				"type": "string",
-				"minLength": 1
+				"maxLength": 64,
+				"pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
 			},
 			"additionalProperties": {
 				"$ref": "#/$defs/product"
@@ -74,6 +75,13 @@
 						"type": "string",
 						"minLength": 1
 					}
+				},
+				"licensedPlatforms": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"minLength": 1
+					}
 				}
 			},
 			"required": [
@@ -84,11 +92,26 @@
 		"product": {
 			"type": "object",
 			"properties": {
+				"displayName": {
+					"type": "string",
+					"minLength": 1
+				},
 				"description": {
 					"type": "string"
 				},
 				"isActive": {
 					"type": "boolean"
+				},
+				"resources": {
+					"type": "object",
+					"propertyNames": {
+						"type": "string",
+						"maxLength": 128,
+						"pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+					},
+					"additionalProperties": {
+						"$ref": "#/$defs/resource"
+					}
 				},
 				"meters": {
 					"type": "object",
@@ -104,7 +127,8 @@
 					"type": "object",
 					"propertyNames": {
 						"type": "string",
-						"minLength": 1
+						"maxLength": 128,
+						"pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
 					},
 					"additionalProperties": {
 						"$ref": "#/$defs/offering"
@@ -114,7 +138,8 @@
 					"type": "object",
 					"propertyNames": {
 						"type": "string",
-						"minLength": 1
+						"maxLength": 64,
+						"pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
 					},
 					"additionalProperties": {
 						"$ref": "#/$defs/plan"
@@ -122,8 +147,28 @@
 				}
 			},
 			"required": [
+				"displayName",
 				"offerings",
 				"plans"
+			],
+			"additionalProperties": false
+		},
+		"resource": {
+			"type": "object",
+			"properties": {
+				"displayName": {
+					"type": "string",
+					"minLength": 1
+				},
+				"unit": {
+					"type": "string",
+					"minLength": 1,
+					"maxLength": 32
+				}
+			},
+			"required": [
+				"displayName",
+				"unit"
 			],
 			"additionalProperties": false
 		},
@@ -178,22 +223,30 @@
 					"type": "boolean"
 				},
 				"resources": {
-					"$ref": "#/$defs/resources"
+					"type": "object",
+					"propertyNames": {
+						"type": "string",
+						"maxLength": 128,
+						"pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+					},
+					"additionalProperties": {
+						"type": "number",
+						"exclusiveMinimum": 0
+					}
+				},
+				"settings": {
+					"$ref": "#/$defs/settings"
 				}
 			},
 			"required": [
 				"displayName",
-				"resources"
+				"settings"
 			],
 			"additionalProperties": false
 		},
-		"resources": {
+		"settings": {
 			"type": "object",
 			"properties": {
-				"addonCode": {
-					"type": "string",
-					"minLength": 1
-				},
 				"surfaces": {
 					"minItems": 1,
 					"type": "array",
@@ -228,10 +281,29 @@
 						"additionalProperties": false
 					}
 				},
+				"validityDays": {
+					"type": "integer",
+					"exclusiveMinimum": 0,
+					"maximum": 9007199254740991
+				},
 				"maxDevices": {
 					"type": "integer",
 					"exclusiveMinimum": 0,
 					"maximum": 9007199254740991
+				},
+				"requiresOfferings": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"minLength": 1
+					}
+				},
+				"satisfiesOfferings": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"minLength": 1
+					}
 				}
 			},
 			"required": [
@@ -242,6 +314,10 @@
 		"plan": {
 			"type": "object",
 			"properties": {
+				"displayName": {
+					"type": "string",
+					"minLength": 1
+				},
 				"description": {
 					"type": "string"
 				},
@@ -253,12 +329,20 @@
 				"isActive": {
 					"type": "boolean"
 				},
-				"offeringCodes": {
-					"minItems": 1,
-					"type": "array",
-					"items": {
+				"comingSoon": {
+					"type": "boolean"
+				},
+				"offerings": {
+					"type": "object",
+					"propertyNames": {
 						"type": "string",
-						"minLength": 1
+						"maxLength": 128,
+						"pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+					},
+					"additionalProperties": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 9007199254740991
 					}
 				},
 				"pricings": {
@@ -273,7 +357,8 @@
 				}
 			},
 			"required": [
-				"offeringCodes",
+				"displayName",
+				"offerings",
 				"pricings"
 			],
 			"additionalProperties": false

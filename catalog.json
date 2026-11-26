@@ -1,14 +1,19 @@
 {
 	"$schema": "./schemas/catalog.schema.json",
 	"schemaVersion": 1,
-	"surfaces": ["idr"],
+	"surfaces": [
+		"idr"
+	],
 	"hosts": {
 		"idrAgent": {
-			"surfaces": ["idr"]
+			"surfaces": [
+				"idr"
+			]
 		}
 	},
 	"products": {
-		"IDR": {
+		"idr": {
+			"displayName": "IDR",
 			"description": "IDR Presence packages: Personal, Enterprise, Service Provider, and prepaid data transfer",
 			"isActive": true,
 			"meters": {
@@ -16,77 +21,107 @@
 					"displayName": "IDR data transfer",
 					"unit": "byte",
 					"aggregation": "sum",
-					"description": "Shared Relay + TURN wallet. Target pays to+from the Target. Sources are not billed."
+					"description": "Bytes relayed through Relay and TURN (to + from the Target). One shared wallet; the Target pays. P2P traffic and Sources are not billed."
 				}
 			},
 			"offerings": {
 				"idr_personal_bundle": {
 					"displayName": "Personal Package",
-					"resources": {
-						"addonCode": "idr_personal_bundle",
-						"surfaces": ["idr"],
+					"settings": {
+						"surfaces": [
+							"idr"
+						],
 						"maxDevices": 5,
 						"package": "personal"
 					}
 				},
 				"idr_enterprise_bundle": {
 					"displayName": "Enterprise Package",
-					"resources": {
-						"addonCode": "idr_enterprise_bundle",
-						"surfaces": ["idr"],
+					"settings": {
+						"surfaces": [
+							"idr"
+						],
 						"maxDevices": 5,
 						"package": "enterprise"
 					}
 				},
 				"idr_sp_target": {
 					"displayName": "Service Provider Package",
-					"resources": {
-						"addonCode": "idr_sp_target",
-						"surfaces": ["idr"],
+					"settings": {
+						"surfaces": [
+							"idr"
+						],
 						"maxDevices": 1,
 						"package": "service_provider",
 						"allowsAnonymousSources": true
 					}
 				},
-				"data_transfer_1tb": {
-					"displayName": "Usage-based billing",
-					"resources": {
-						"addonCode": "idr_data_transfer_1tb",
-						"surfaces": ["idr"],
+				"idr_data_transfer_1tb": {
+					"displayName": "Data Transfer 1 TB",
+					"settings": {
+						"surfaces": [
+							"idr"
+						],
 						"usageGrants": {
-							"idr.transfer.bytes": { "quantity": 1099511627776 }
+							"idr.transfer.bytes": {
+								"quantity": 1099511627776
+							}
 						},
-						"validity_days": 365
+						"validityDays": 365
 					}
 				}
 			},
 			"plans": {
-				"Personal Package": {
-					"description": "Up to 5 devices. US$5 per annum.",
-					"offeringCodes": ["idr_personal_bundle"],
+				"idr_personal_bundle": {
+					"displayName": "Personal Package",
+					"description": "Up to 5 devices. US$10 per annum.",
+					"offerings": {
+						"idr_personal_bundle": 1
+					},
 					"pricings": {
-						"annual": { "currency": "USD", "basePrice": 5 }
+						"annual": {
+							"currency": "USD",
+							"basePrice": 10
+						}
 					}
 				},
-				"Enterprise Package": {
-					"description": "Up to 5 devices. US$25 per annum.",
-					"offeringCodes": ["idr_enterprise_bundle"],
+				"idr_enterprise_bundle": {
+					"displayName": "Enterprise Package",
+					"description": "Up to 5 devices. US$10 per month.",
+					"offerings": {
+						"idr_enterprise_bundle": 1
+					},
 					"pricings": {
-						"annual": { "currency": "USD", "basePrice": 25 }
+						"monthly": {
+							"currency": "USD",
+							"basePrice": 10
+						}
 					}
 				},
-				"Service Provider Package": {
-					"description": "One device. US$20 per annum.",
-					"offeringCodes": ["idr_sp_target"],
+				"idr_sp_target": {
+					"displayName": "Service Provider Package",
+					"description": "One device. US$25 per annum.",
+					"offerings": {
+						"idr_sp_target": 1
+					},
 					"pricings": {
-						"annual": { "currency": "USD", "basePrice": 20 }
+						"annual": {
+							"currency": "USD",
+							"basePrice": 25
+						}
 					}
 				},
-				"Usage-based billing": {
-					"description": "Prepaid 1 TB data transfer (Relay + TURN shared wallet). Valid up to one year. US$10 per TB. Top up anytime.",
-					"offeringCodes": ["data_transfer_1tb"],
+				"idr_data_transfer_1tb": {
+					"displayName": "Data Transfer 1 TB",
+					"description": "Prepaid 1 TB of data relayed through Relay and TURN (one shared wallet). Valid for one year. US$10 per TB. Top up anytime.",
+					"offerings": {
+						"idr_data_transfer_1tb": 1
+					},
 					"pricings": {
-						"annual": { "currency": "USD", "basePrice": 10 }
+						"annual": {
+							"currency": "USD",
+							"basePrice": 10
+						}
 					}
 				}
 			}

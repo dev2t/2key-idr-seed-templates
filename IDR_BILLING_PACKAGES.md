@@ -8,18 +8,18 @@ Day-to-day price/copy edits: [docs/recipes.md](docs/recipes.md). Field list: [do
 
 | Shop title (plan key) | Offering key | Addon code | Price | Device seats | Package / Sources |
 |-----------------------|--------------|------------|-------|--------------|-------------------|
-| Personal Package | `idr_personal_bundle` | `idr_personal_bundle` | US$5 / year | 5 | `package`: `personal`. Authenticated Sources (mTLS). |
-| Enterprise Package | `idr_enterprise_bundle` | `idr_enterprise_bundle` | US$25 / year | 5 | `package`: `enterprise`. Authenticated Sources (mTLS). |
-| Service Provider Package | `idr_sp_target` | `idr_sp_target` | US$20 / year | 1 | `package`: `service_provider`. `allowsAnonymousSources`: true. |
-| Usage-based billing | `data_transfer_1tb` | `idr_data_transfer_1tb` | US$10 / TB / year | — | Prepaid grant, not a seat. |
+| Personal Package | `idr_personal_bundle` | `idr_personal_bundle` | US$10 / year | 5 | `package`: `personal`. Authenticated Sources (mTLS). |
+| Enterprise Package | `idr_enterprise_bundle` | `idr_enterprise_bundle` | US$10 / month | 5 | `package`: `enterprise`. Authenticated Sources (mTLS). |
+| Service Provider Package | `idr_sp_target` | `idr_sp_target` | US$25 / year | 1 | `package`: `service_provider`. `allowsAnonymousSources`: true. |
+| Usage-based billing | `idr_data_transfer_1tb` | `idr_data_transfer_1tb` | US$10 / TB / year | — | Prepaid grant, not a seat. |
 
-Offering `data_transfer_1tb` grants `resources.usageGrants` on meter `idr.transfer.bytes` (quantity `1099511627776` = 1 TiB, `validity_days` 365). Relay and TURN report against that shared `meter_key`.
+Offering `idr_data_transfer_1tb` grants `settings.usageGrants` on meter `idr.transfer.bytes` (quantity `1099511627776` = 1 TiB, `validityDays` 365). Only bytes relayed through Relay and TURN count (to + from the Target; P2P is never metered). Relay and TURN report against that shared `meter_key`, each flushing when its byte threshold or time interval (e.g. hourly) is reached, whichever comes first.
 
 Do not rename live keys (`IDR`, plan titles, offering keys, addon codes). Hide with `"isActive": false` instead.
 
 ## Rules
 
-- **Device** = Target only (Sources are not seats). Caps come from `resources.maxDevices`.
+- **Device** = Target only (Sources are not seats). Caps come from `settings.maxDevices`.
 - **Who pays data**: always the Target’s `paying_party` (to+from Target).
 - **Meter**: `idr.transfer.bytes` — one wallet for Relay + TURN. Sources never report or get invoiced.
 - **P2P WebRTC**: free (no Relay/TURN bytes).
@@ -37,13 +37,13 @@ POST /api/auth/agent/token
 
 (Public surface: `https://auth.idr.to/api/auth/agent/token` → this Billing instance.) Agents present `entitlement_jwt` on `register_target`. Presence verifies via JWKS (`GET /api/auth/jwks`), caches claims, and gates register / accept_session / ensure_relay / mint_turn in-process.
 
-Claims include `using_party`, `paying_party`, `target_fqhn`, `actions`, `features.package` / `allows_anonymous_sources`, and `subscription.*`. Catalog encodes the same package flags as `resources.package` and `resources.allowsAnonymousSources`. See Presence [AUTH.md](https://github.com/idrto/presence/blob/main/docs/AUTH.md).
+Claims include `using_party`, `paying_party`, `target_fqhn`, `actions`, `features.package` / `allows_anonymous_sources`, and `subscription.*`. Catalog encodes the same package flags as `settings.package` and `settings.allowsAnonymousSources`. See Presence [AUTH.md](https://github.com/idrto/presence/blob/main/docs/AUTH.md).
 
 **Not yet re-implemented** (formerly mux pushes): remote disconnect / admission kill, dynamic Entity CA-root push, domain alias push, `session_open`/`session_close` usage binding.
 
 ## Usage wallets (prepaid meters)
 
-Data Transfer is a **prepaid meter wallet**, not a seat entitlement. Catalog offerings expose `resources.usageGrants` (`meter_key` → `{ "quantity": … }`) and optional `validity_days`. Checkout / renewal / top-up **credit** `usage_balances` for the paying party; balances are not tied to subscription lifetime.
+Data Transfer is a **prepaid meter wallet**, not a seat entitlement. Catalog offerings expose `settings.usageGrants` (`meter_key` → `{ "quantity": … }`) and optional `validityDays`. Checkout / renewal / top-up **credit** `usage_balances` for the paying party; balances are not tied to subscription lifetime.
 
 Commercial transfer uses one wallet meter that both Relay and TURN report against (shared pool = one `meter_key`). Seat bundles remain separate offerings.
 

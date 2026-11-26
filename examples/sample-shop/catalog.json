@@ -17,7 +17,8 @@
 		}
 	},
 	"products": {
-		"SecMail": {
+		"secmail": {
+			"displayName": "SecMail",
 			"description": "Scomm Email and Office add-ons",
 			"isActive": true,
 			"meters": {
@@ -30,69 +31,57 @@
 			"offerings": {
 				"pgp": {
 					"displayName": "Outlook OpenPGP ECC",
-					"resources": {
-						"addonCode": "pgp",
+					"settings": {
 						"surfaces": ["office"]
 					}
 				},
 				"pqc": {
 					"displayName": "Outlook OpenPGP ECC+PQC",
-					"resources": {
-						"addonCode": "pqc",
+					"settings": {
 						"surfaces": ["secmail", "office"]
 					}
 				},
 				"linux": {
 					"displayName": "Linux Version",
-					"resources": {
-						"addonCode": "linux",
+					"settings": {
 						"surfaces": ["secmail"],
 						"platforms": ["linux"]
 					}
 				},
 				"ai_assistant": {
 					"displayName": "Local-AI",
-					"resources": {
-						"addonCode": "ai_assistant",
+					"settings": {
 						"surfaces": ["secmail", "office"]
 					}
 				}
 			},
 			"plans": {
-				"Outlook OpenPGP ECC": {
-					"offeringCodes": ["pgp"],
+				"pgp": {
+					"displayName": "Outlook OpenPGP ECC",
+					"offerings": { "pgp": 1 },
 					"pricings": {
-						"annual": {
-							"currency": "USD",
-							"basePrice": 5
-						}
+						"annual": { "currency": "USD", "basePrice": 5 }
 					}
 				},
-				"Outlook OpenPGP ECC+PQC": {
-					"offeringCodes": ["pqc"],
+				"pqc": {
+					"displayName": "Outlook OpenPGP ECC+PQC",
+					"offerings": { "pqc": 1 },
 					"pricings": {
-						"annual": {
-							"currency": "USD",
-							"basePrice": 15
-						}
+						"annual": { "currency": "USD", "basePrice": 15 }
 					}
 				},
-				"Linux Version": {
-					"offeringCodes": ["linux"],
+				"linux": {
+					"displayName": "Linux Version",
+					"offerings": { "linux": 1 },
 					"pricings": {
-						"annual": {
-							"currency": "USD",
-							"basePrice": 5
-						}
+						"annual": { "currency": "USD", "basePrice": 5 }
 					}
 				},
-				"Local-AI": {
-					"offeringCodes": ["ai_assistant"],
+				"ai_assistant": {
+					"displayName": "Local-AI",
+					"offerings": { "ai_assistant": 1 },
 					"pricings": {
-						"annual": {
-							"currency": "USD",
-							"basePrice": 5
-						}
+						"annual": { "currency": "USD", "basePrice": 5 }
 					}
 				}
 			}

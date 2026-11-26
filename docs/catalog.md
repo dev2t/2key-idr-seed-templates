@@ -6,7 +6,7 @@ Do not put database ids in this file. We assign those when we apply the catalog 
 
 Keep `"$schema": "./schemas/catalog.schema.json"` at the top.
 
-**IDR live data is root `catalog.json`.** Product `IDR`. Surface `idr`. Host `idrAgent`. `examples/` is not the shop. Scomm is a **different tenant** and a different repo.
+**IDR live data is root `catalog.json`.** Product code `idr` (display name `IDR`). Surface `idr`. Host `idrAgent`. `examples/` is not the shop. Scomm is a **different tenant** and a different repo.
 
 ## Example shape
 
@@ -21,29 +21,29 @@ Keep `"$schema": "./schemas/catalog.schema.json"` at the top.
     "desktop": { "surfaces": ["desktop"], "excludePlatforms": ["linux"] }
   },
   "products": {
-    "ExampleProduct": {
+    "example_product": {
+      "displayName": "Example product",
       "description": "What this product is",
       "isActive": true,
       "offerings": {
         "basic": {
           "displayName": "Basic",
-          "resources": {
-            "addonCode": "basic",
+          "settings": {
             "surfaces": ["web", "desktop"]
           }
         },
         "linux_build": {
           "displayName": "Linux build",
-          "resources": {
-            "addonCode": "linux_build",
+          "settings": {
             "surfaces": ["desktop"],
             "platforms": ["linux"]
           }
         }
       },
       "plans": {
-        "Basic annual": {
-          "offeringCodes": ["basic"],
+        "basic": {
+          "displayName": "Basic annual",
+          "offerings": { "basic": 1 },
           "pricings": {
             "annual": { "currency": "USD", "basePrice": 10 }
           }
@@ -54,7 +54,7 @@ Keep `"$schema": "./schemas/catalog.schema.json"` at the top.
 }
 ```
 
-You choose the words (`web`, `desktop`, host names, product names). Empty `"products": {}` is valid **only on the blank template**. A tenant fork must be filled before we apply.
+You choose the words (`web`, `desktop`, host names, product and plan codes). Empty `"products": {}` is valid **only on the blank template**. A tenant fork must be filled before we apply.
 
 ## What each part is
 
@@ -63,22 +63,25 @@ You choose the words (`web`, `desktop`, host names, product names). Empty `"prod
 | `surfaces` | Labels for “which kind of app” (email vs office, web vs desktop, …). List them here before you use them on a SKU. |
 | `platforms` | Extra OS labels (today: `linux` if you have a Linux-only SKU). |
 | `hosts` | Your apps. Each host lists which `surfaces` it sells. Optional `excludePlatforms` hides Linux-only SKUs from a desktop host. |
-| `products` | What customers buy under. IDR’s live product is root `"IDR"`. Empty `{}` is not this fork. |
-| `offerings` | **What the app unlocks** (codes your apps check). No price. One offering can sit on several plans. |
-| `plans` | **What the shop sells** (priced SKUs). `offeringCodes` must be offering keys **on that product**. |
+| `products` | What customers buy under, keyed by **product code** (`displayName` required). IDR’s live product is `"idr"`. Empty `{}` is not this fork. |
+| `offerings` | **What the app unlocks**, keyed by the **offering code** your apps check. No price. One offering can sit on several plans. |
+| `plans` | **What the shop sells** (priced SKUs), keyed by **plan code** (`displayName` required). `offerings` maps offering keys **on that product** to units per plan (usually `1`). |
 | `pricings` | `annual` / `monthly` / … → `{ "currency": "USD", "basePrice": 10 }`. One currency per interval in this version. |
 
 Optional `billingEngineTag` is a note for us (which catalog format this file was written against). `schemaVersion` is `1` for this format.
 
-## Add-on details (`resources`)
+## Offering rules (`settings`)
 
 | Field | Meaning |
 |-------|---------|
-| `surfaces` | Which of your surfaces this add-on belongs to. |
+| `surfaces` | Required. Which of your surfaces this offering belongs to. |
 | `platforms` | Optional OS scope. |
-| `addonCode` | Code the app uses to gate the feature. Defaults to the offering key. |
-| `maxDevices` | Optional device cap. |
-| `usageGrants` | Optional prepaid usage, e.g. `{ "my.meter": { "quantity": 1000 } }`. |
+| `maxDevices` | Optional device cap (per unit). |
+| `usageGrants` | Optional prepaid usage, e.g. `{ "my.meter": { "quantity": 1000 } }`. The meter must be declared under the product's `meters`. |
+| `validityDays` | Optional: how long a usage grant stays usable. |
+| other keys | Tenant values billing passes through as written (IDR: `package`, `allowsAnonymousSources`). |
+
+The offering key is the code apps gate on; there is no separate `addonCode` any more. Granted amounts (`resources`, optional) are product resources with an amount per offering.
 
 `npm run validate` checks the file shape. It will not catch a plan pointing at a missing offering, or a currency we have not enabled — we catch those when we apply.
 
@@ -86,7 +89,7 @@ Optional `billingEngineTag` is a note for us (which catalog format this file was
 
 You name hosts. You do **not** list offering codes by hand.
 
-`npm run validate` writes `hosts.json` (product names + offering/addon codes, **no prices**). Commit it. Your apps should use that file. Do not edit it by hand.
+`npm run validate` writes `hosts.json` (product codes + offering codes per host, **no prices**). Commit it. Your apps should use that file. Do not edit it by hand.
 
 A SKU appears on a host when:
 
